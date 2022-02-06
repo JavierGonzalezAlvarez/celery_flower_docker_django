@@ -1,0 +1,76 @@
+version: '3.4'
+
+services:
+  django-web:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    container_name: django-web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    networks:
+      - platform-network
+
+  rabbit:
+    image: rabbitmq:3.8.9-management
+    container_name: rabbitmq-django
+    restart: "always"
+    build:
+      context: .
+      dockerfile: ./docker_rabbit/Dockerfile
+    volumes:
+      - ./docker/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    ports:
+      #port messenger
+      - 5672:5672
+      #port ui
+      - 15672:15672
+    networks:
+      - platform-network
+
+  celery:
+    container_name: celery-django
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    command: celery -A conf worker -B -l info
+    #command: celery -A celery worker -B -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: "conf.settings"
+    volumes:
+      - .:/code
+      - ./logs:/code/logs
+    depends_on:
+      - rabbit
+    networks:
+      - platform-network
+
+  flower_celery:
+    image: mher/flower
+    container_name: flower-django
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    command: celery -A conf flower --port=5555 --address=0.0.0.0
+    #command: celery -A conf flower --broker=amqp://guest:guest@localhost:5672// --port=5555 --address=0.0.0.0
+    environment:
+      #- FLOWER_PORT=5555
+      #- CELERY_BROKER_URL=amqp://guest:guest@localhost:5672//
+      DJANGO_SETTINGS_MODULE: "conf.settings"
+    depends_on:
+      - celery
+      - rabbit
+      - django-web
+    volumes:
+      - .:/code
+    ports:
+      - "5555:5555"
+    networks:
+      - platform-network
+
+networks:
+  platform-network:
+    external: true
