@@ -9,13 +9,13 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import environ
+#import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env()
+#env = environ.Env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -31,7 +31,6 @@ ALLOWED_HOSTS = ['.localhost', '127.0.0.1',
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
-    # 'django-celery-results',
-    # 'django-celery-beat',
+    'django_celery_beat',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -74,17 +73,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'conf.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': BASE_DIR / 'db.sqlite3',
+    # }
+
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'celery',
+        'USER': 'test',
+        'PASSWORD': '2525_ap',
+        'HOST': 'localhost',
+        # 'HOST': 'django-pg-celery',
+        'PORT': '5432'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -109,15 +116,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -129,44 +131,51 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#CELERY_BROKER_URL = 'amqp://localhost'
-
+'''
 # celery
 # ---------------------------------------------------------------
 broker_host = env('BROKER_HOST', default='rabbitmq')
-#broker_host = env('BROKER_HOST', default='localhost')
+# broker_host = env('BROKER_HOST', default='localhost')
 broker_user = env('BROKER_USER', default='guest')
 broker_password = env('BROKER_PASSWORD', default='guest')
 broker_vhost = env('BROKER_VHOST', default='guest')
+'''
 
-#BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
+'''
 # CELERY_BROKER
-
-CELERY_BROKER_URL = "amqp://{0}:{1}@{2}:5672/{3}".format(
+#--------------------------
+CELERY_BROKER_URL = 'amqp://{0}:{1}@{2}:5672/{3}'.format(
     broker_user,
     broker_password,
     broker_host,
     broker_vhost
 )
+'''
 
-CELERY_RESULT_BACKEND = 'amqp://guest:guest@localhost:5672/'
+# CELERY RESULT
+# --------------------------
+CELERY_RESULT_BACKEND = "amqp://guest:guest@localhost:5672/"
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
 
-CELERY_DEFAULT_QUEUE = 'guest'
-CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
-task_default_queue = 'guest'
-task_always_eager = True
-CELERY_ALWAYS_EAGER = env.bool('CELERY_ALWAYS_EAGER', False)
+#CELERY_DEFAULT_QUEUE = 'guest'
+#CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
+#task_default_queue = 'guest'
+#task_always_eager = True
+#CELERY_ALWAYS_EAGER = env.bool('CELERY_ALWAYS_EAGER', False)
 
 CELERY_TIMEZONE = "Europe/Madrid"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-# flower
+# FLOWER
 # ---------------------------------------------------------------
 FLOWER_PORT = 5555
 FLOWER_MAX_TASKS = 3600
-#FLOWER_BASIC_AUTH = 'guest:guest'
+# FLOWER_BASIC_AUTH = 'guest:guest'
+
 '''
 FLOWER_BROKER_API = "amqp://{0}:{1}@{2}:5672/{3}".format(
     broker_user,
@@ -174,4 +183,17 @@ FLOWER_BROKER_API = "amqp://{0}:{1}@{2}:5672/{3}".format(
     broker_host,
     broker_vhost
 )
+
 '''
+
+CELERY_BEAT_SCHEDULE = {
+    "scheduled_task": {
+        "task": "app1.tasks.add",
+        "schedule": 5.0,
+        "args": (10, 10),
+    },
+    # "database": {
+    #    "task": "app1.tasks.bkup",
+    #    "schedule": 5.0,
+    # },
+}

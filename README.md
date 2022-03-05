@@ -11,11 +11,21 @@ deactivate
 
 ## install requirements
 pip install -r requirements.txt 
-pip install celery
+pip install -U django-celery-results
 
 ## create project
 $ django-admin startproject app1
 $ app1/django-admin startapp app
+
+# create db
+sudo -u postgres psql
+CREATE DATABASE celery WITH OWNER test;
+DROP DATABASE celery;
+
+## create user
+python manage.py createsuperuser
+javier
+89_Lp%wD
 
 ## run django
 $ python3 manage.py runserver
@@ -28,7 +38,22 @@ $ sudo apt-get install rabbitmq-server
 sudo apt install python-celery-common
 
 ## activar rabbitmq-server
+ps aux | grep rabbit
+suod kill -9 number_process
+
+
+sudo ufw allow 5672/tcp
+-chequear si hostname es correcto
+$ sudo hostname --file /etc/hostname
+
+$ systemctl status rabbitmq-server.service
+o
 $ sudo systemctl enabled rabbitmq-server
+
+-en caso de error:
+$ sudo hostname --file /etc/hostname
+
+
 $ systemctl status rabbitmq-server
 
 ## consola del administrador
@@ -57,8 +82,7 @@ docker rm $(docker ps -a -q) -f
 docker image ls
 docker rmi $(docker images -q)
 
-$ docker exec -it f659e0ebfebd /bin/bash
-
+$ docker exec -it d4c9487fade6 /bin/bash
 
 http://localhost:8000/
 http://localhost:15672/
@@ -78,3 +102,20 @@ $ sudo usermod -a -G docker $USER
 
 # install docker-compose
 $ sudo apt install docker-compose
+
+
+------------------
+CELERY BEAT
+------------------
+celery -A conf beat -l INFO 
+celery -A conf worker -B -l INFO
+
+..................
+CELERY
+..................
+celery -A conf worker --loglevel=info
+
+CELERY & CELERY BEAT
+-------------------------
+celery -A conf worker -B -l info
+
