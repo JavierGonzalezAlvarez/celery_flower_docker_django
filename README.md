@@ -1,4 +1,5 @@
 # django celery and rabbitmq
+sudo setxkbmap -layout 'es,es' -model pc105
 
 ## Create V.E
 virtualenv entorno_virtual -p python3
@@ -39,7 +40,7 @@ sudo apt install python-celery-common
 
 ## activar rabbitmq-server
 ps aux | grep rabbit
-suod kill -9 number_process
+sudo kill -9 number_process
 
 
 sudo ufw allow 5672/tcp
@@ -50,16 +51,21 @@ $ systemctl status rabbitmq-server.service
 o
 $ sudo systemctl enabled rabbitmq-server
 
+-confirm is running
+$ systemctl is-enabled rabbitmq-server.service 
+
 -en caso de error:
 $ sudo hostname --file /etc/hostname
-
 
 $ systemctl status rabbitmq-server
 
 ## consola del administrador
 $ apt-get install erlang
-$ rabbitmq-plugins enable rabbitmq_management
+$ sudo rabbitmq-plugins enable rabbitmq_management
 $ sudo ufw allow proto tcp from any to any port 5672,15672
+
+sudo rabbitmq-plugins enable rabbitmq_management
+
 
 # uninstall rabbitmq-server
 sudo apt-get remove --auto-remove rabbitmq-server
@@ -103,19 +109,55 @@ $ sudo usermod -a -G docker $USER
 # install docker-compose
 $ sudo apt install docker-compose
 
+# comandos rabbitmq (ok) (inside ve)
+--------------------------------------
+$ sudo rabbitmqctl list_queues
 
 ------------------
-CELERY BEAT
-------------------
+# RUN CELERY BEAT (ok)
+--------------------------
 celery -A conf beat -l INFO 
-celery -A conf worker -B -l INFO
+-in this case we set CELERYBEAT_SCHEDULE in "settings.py"
+CELERYBEAT_SCHEDULE = {
+    'scheduled_task': {
+        'task': 'run_task_add', # the same name that we have in the task.py
+        #'schedule': crontab(hour=8, minute=31),
+        'schedule': crontab(minute='*/15'), #Execute every 15 minutes        
+        'args': (2,2)
+        #'schedule': timedelta(seconds=3),
+    },
+    'scheduled_task': {
+        'task': 'run_task_hi', # the same name that we have in the task.py
+        'schedule': crontab(minute='*/1'),                
+    },
+}
+
+
 
 ..................
-CELERY
+# RUN CELERY (OK)
 ..................
 celery -A conf worker --loglevel=info
+celery -A conf worker --loglevel=DEBUG
 
-CELERY & CELERY BEAT
--------------------------
-celery -A conf worker -B -l info
+# RUN CELERY BEAT (ok) (inside ve) - MORE THAN 1 WORKER (-B)
+-no in production
+----------------------------------------------------------------------
+(no) celery -A conf worker -B -l info
+celery -A proj beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
+# RUN FLOWER (ok) (inside ve)
+-----------------------------------
+celery -A conf flower --broker=amqp://guest:guest@localhost:5672// --port=5555 --address=0.0.0.0
+
+http://localhost:5555
+
+## CHECK TASK
+celery inspect reserved
+celery inspect scheduled
+celery inspect registered
+celery inspect active
+
+# + info
+sudo hostname --file /etc/hostname
+worker => celery@ubuntu

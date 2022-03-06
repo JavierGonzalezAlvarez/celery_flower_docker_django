@@ -6,9 +6,13 @@ from celery import Celery
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'conf.settings')
 
 app = Celery('conf')
-#app = Celery('test_celery',broker='amqp://admin:mypass@10.211.55.12:5672',backend='rpc://',include=['test_celery.tasks'])
 
+# Using a string here means the worker doesn't have to serialize
+# the configuration object to child processes.
+# - namespace='CELERY' means all celery-related configuration keys
+#   should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # creamos una instancia
+# Load task modules from all registered Django apps.
 app.autodiscover_tasks()

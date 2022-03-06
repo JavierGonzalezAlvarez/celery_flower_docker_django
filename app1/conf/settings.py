@@ -9,13 +9,13 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-#import environ
+import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-#env = environ.Env()
+env = environ.Env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
     'django_celery_beat',
-    'django_celery_results',
+    'django_celery_results',    
 ]
 
 MIDDLEWARE = [
@@ -115,7 +115,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+#LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
@@ -131,7 +132,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-'''
+
 # celery
 # ---------------------------------------------------------------
 broker_host = env('BROKER_HOST', default='rabbitmq')
@@ -139,13 +140,13 @@ broker_host = env('BROKER_HOST', default='rabbitmq')
 broker_user = env('BROKER_USER', default='guest')
 broker_password = env('BROKER_PASSWORD', default='guest')
 broker_vhost = env('BROKER_VHOST', default='guest')
-'''
+
 
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
-'''
 # CELERY_BROKER
 #--------------------------
+'''
 CELERY_BROKER_URL = 'amqp://{0}:{1}@{2}:5672/{3}'.format(
     broker_user,
     broker_password,
@@ -156,10 +157,10 @@ CELERY_BROKER_URL = 'amqp://{0}:{1}@{2}:5672/{3}'.format(
 
 # CELERY RESULT
 # --------------------------
-CELERY_RESULT_BACKEND = "amqp://guest:guest@localhost:5672/"
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
 
+#CELERY_DEFAULT_QUEUE = 'celery'
 #CELERY_DEFAULT_QUEUE = 'guest'
 #CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']
 #task_default_queue = 'guest'
@@ -176,6 +177,8 @@ FLOWER_PORT = 5555
 FLOWER_MAX_TASKS = 3600
 # FLOWER_BASIC_AUTH = 'guest:guest'
 
+FLOWER_BROKER_API = 'amqp://guest:guest@localhost:5672/'
+
 '''
 FLOWER_BROKER_API = "amqp://{0}:{1}@{2}:5672/{3}".format(
     broker_user,
@@ -183,17 +186,38 @@ FLOWER_BROKER_API = "amqp://{0}:{1}@{2}:5672/{3}".format(
     broker_host,
     broker_vhost
 )
-
 '''
 
-CELERY_BEAT_SCHEDULE = {
-    "scheduled_task": {
-        "task": "app1.tasks.add",
-        "schedule": 5.0,
-        "args": (10, 10),
+#from celery.schedules import crontab
+#from datetime import timedelta
+
+# MANUAL SCHEDULE
+'''
+CELERYBEAT_SCHEDULE = {
+    'scheduled_task': {
+        'task': 'run_task_add', # the same name that we have in the task.py
+        #'schedule': crontab(hour=8, minute=31),
+        'schedule': crontab(minute='*/15'), #Execute every 15 minutes        
+        'args': (2,2)
+        #'schedule': timedelta(seconds=3),
     },
-    # "database": {
-    #    "task": "app1.tasks.bkup",
-    #    "schedule": 5.0,
-    # },
+    'scheduled_task': {
+        'task': 'run_task_hi', # the same name that we have in the task.py
+        'schedule': crontab(minute='*/1'),                
+    },
 }
+
+CELERYBEAT_SCHEDULE = {
+    'scheduled_task': {
+        #'task': 'app.tasks.add',
+        'task': 'run_task_add',
+        'schedule': 6.0, #5 seconds
+        'args': (10, 10),  # parameters for add()
+    },
+    'scheduled_task': {
+        #'task': 'app.tasks.hi',
+        'task': 'run_task_hi',
+        'schedule': 5.0,
+     },
+}
+'''
