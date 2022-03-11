@@ -10,7 +10,7 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV '/home/javier/Escritorio/Proyectos/python/django/django_celery_rabbitmq/entorno_virtual'
+setenv VIRTUAL_ENV '/home/javier/Desktop/proyectos/django_rabbitmq/celery_flower_docker_django/entorno_virtual'
 
 set _OLD_VIRTUAL_PATH="$PATH:q"
 setenv PATH "$VIRTUAL_ENV:q/bin:$PATH:q"

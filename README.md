@@ -144,7 +144,7 @@ celery -A conf worker --loglevel=DEBUG
 -no in production
 ----------------------------------------------------------------------
 (no) celery -A conf worker -B -l info
-celery -A proj beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+celery -A conf beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
 # RUN FLOWER (ok) (inside ve)
 -----------------------------------
@@ -161,3 +161,8 @@ celery inspect active
 # + info
 sudo hostname --file /etc/hostname
 worker => celery@ubuntu
+
+
+# acceder a la api de flower
+sudo apt  install curl 
+http://localhost:5555/api/tasks?state=SUCCESS&limit=2

@@ -28,7 +28,7 @@ def _deactivate(args):
 _deactivate(["nondestructive"])
 aliases["deactivate"] = _deactivate
 
-$VIRTUAL_ENV = r"/home/javier/Escritorio/Proyectos/python/django/django_celery_rabbitmq/entorno_virtual"
+$VIRTUAL_ENV = r"/home/javier/Desktop/proyectos/django_rabbitmq/celery_flower_docker_django/entorno_virtual"
 
 $_OLD_VIRTUAL_PATH = $PATH
 $PATH = $PATH[:]

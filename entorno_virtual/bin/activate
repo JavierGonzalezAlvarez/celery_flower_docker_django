@@ -46,7 +46,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV='/home/javier/Escritorio/Proyectos/python/django/django_celery_rabbitmq/entorno_virtual'
+VIRTUAL_ENV='/home/javier/Desktop/proyectos/django_rabbitmq/celery_flower_docker_django/entorno_virtual'
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
